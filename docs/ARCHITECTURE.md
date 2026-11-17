@@ -63,6 +63,11 @@ Cykle nie są osobną encją — kolejne przebiegi wynikają z powtórzeń etap�
 
 **name i tags**: kolejne deklaratywne rozwiązania w `SickDoggy\MessengerMonitoring\Attribute\` (para atrybut+resolver): `#[Name('...')]` — własna nazwa wystąpienia (UX zamiast className), `#[Tags([...])]` — etykiety do filtrowania. Wszystkie trzy wartości składane są przez `MessageContextFactory` do `MessageContext` (className + monitoringId + name + tags) i przechodzą w nagłówku każdego POST-u. Store: `monitoring_id`, `name` (nullable, indeksowane), `tags` (kolekcja) — upsert: pierwsze niepuste trafienie, null/pusta lista nie nadpisuje.
 
+**payload (opcjonalne, atrybut #[Payload(groups?: [...])])**: deweloper wyraża zgodę na przesłanie
+zserializowanego message'a (Symfony Serializer → JSON string). Payload jest **przypisany do stanów wytworzonych
+na stronie producenta** (sent/handled synchroniczna/send-failed) — pole `status_entry.payload` (TEXT/JSON, nullable).
+Wymagania po stronie aplikacji: `symfony/serializer` + `symfony/property-access` i `framework: serializer: { enabled: true }`;
+bez tego payload jest null (fail-safe, bez psucia aplikacji). Serializacja honoruje normalizers aplikacji i grupy.
 ## Kontrakt HTTP (ingest)
 
 `POST /api/lifecycles` (nazwa zasobu do ustalenia w store), payload `MessageLifecycle::toArray()`:

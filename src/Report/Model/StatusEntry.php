@@ -20,6 +20,7 @@ final readonly class StatusEntry
         public ?string $errorMessage = null,
         public ?string $application = null,
         public ?string $environment = null,
+        public ?string $payload = null,
     ) {
     }
 
@@ -38,6 +39,7 @@ final readonly class StatusEntry
             errorMessage: $this->errorMessage,
             application: $application,
             environment: $environment,
+            payload: $this->payload,
         );
     }
 
@@ -61,6 +63,23 @@ final readonly class StatusEntry
             handlerName: $this->handlerName,
             errorClass: get_class($exception),
             errorMessage: $exception->getMessage(),
+            payload: $this->payload,
+        );
+    }
+
+    public function withPayload(?string $payload): self
+    {
+        return $this->payload === $payload ? $this : new self(
+            stage: $this->stage,
+            occurredAt: $this->occurredAt,
+            busName: $this->busName,
+            transportName: $this->transportName,
+            handlerName: $this->handlerName,
+            errorClass: $this->errorClass,
+            errorMessage: $this->errorMessage,
+            application: $this->application,
+            environment: $this->environment,
+            payload: $payload,
         );
     }
 
@@ -79,6 +98,7 @@ final readonly class StatusEntry
             'handlerName' => $this->handlerName,
             'errorClass' => $this->errorClass,
             'errorMessage' => $this->errorMessage,
+            'payload' => $this->payload,
         ];
     }
 

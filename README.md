@@ -75,6 +75,7 @@ Na klasie wiadomości możesz użyć atrybutów (każde rozwiązanie = para: atr
 | `MonitoringId` | id biznesowe wystąpienia — nazwa **publicznego property lub metody** (metoda ma priorytet) | `#[MonitoringId('invoiceId')]` |
 | `Name` | własna nazwa wystąpienia (w store/UX zamiast nazwy klasy) | `#[Name('Wystawienie faktury')]` |
 | `Tags` | etykiety do filtrowania | `#[Tags(['billing', 'critical'])]` |
+| `Payload` | zgoda na serializację message do store (Symfony Serializer; payload tylko na stanach producenta) | `#[Payload(groups: ['monitoring'])]` |
 
 ```php
 use SickDoggy\MessengerMonitoring\Attribute\MonitoringId;

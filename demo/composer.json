@@ -12,7 +12,9 @@
         "symfony/runtime": "^6.4",
         "symfony/yaml": "^6.4",
         "symfony/doctrine-messenger": "^6.4",
-        "doctrine/doctrine-bundle": "^2.12"
+        "doctrine/doctrine-bundle": "^2.12",
+        "symfony/serializer": "^6.4",
+        "symfony/property-access": "^6.4"
     },
     "repositories": [
         {

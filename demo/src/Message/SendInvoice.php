@@ -6,6 +6,7 @@ namespace App\Message;
 
 use SickDoggy\MessengerMonitoring\Attribute\MonitoringId;
 use SickDoggy\MessengerMonitoring\Attribute\Name;
+use SickDoggy\MessengerMonitoring\Attribute\Payload;
 use SickDoggy\MessengerMonitoring\Attribute\Tags;
 use SickDoggy\MessengerMonitoring\MonitoredMessage;
 
@@ -13,9 +14,11 @@ use SickDoggy\MessengerMonitoring\MonitoredMessage;
 // - MonitoringId: publiczne property LUB publiczna metoda zwracająca identyfikator biznesowy
 // - Name: własna nazwa wystąpienia (wyświetlana zamiast nazwy klasy)
 // - Tags: lista etykiet do filtrowania w store/UX
+// - Payload: zgoda na serializację message (Symfony Serializer); groups ograniczają zakres pól
 #[MonitoringId('invoiceId')]
 #[Name('Wystawienie faktury')]
 #[Tags(['billing', 'invoices'])]
+#[Payload()]
 final readonly class SendInvoice implements MonitoredMessage
 {
     public function __construct(

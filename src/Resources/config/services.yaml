@@ -35,3 +35,6 @@ services:
 
     SickDoggy\MessengerMonitoring\Attribute\MessageContextFactory:
         autowire: true
+
+    SickDoggy\MessengerMonitoring\Attribute\PayloadResolver:
+        autowire: true

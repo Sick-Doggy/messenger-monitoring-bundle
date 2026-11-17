@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SickDoggy\MessengerMonitoring\Middleware;
 
 use SickDoggy\MessengerMonitoring\Attribute\MessageContextFactory;
+use SickDoggy\MessengerMonitoring\Attribute\PayloadResolver;
 use SickDoggy\MessengerMonitoring\MonitoredMessage;
 use SickDoggy\MessengerMonitoring\Report\Model\MessageStage;
 use SickDoggy\MessengerMonitoring\Report\StatusChangePublisher;
@@ -22,6 +23,7 @@ final readonly class MonitoringMiddleware implements MiddlewareInterface
     public function __construct(
         private StatusChangePublisher $publisher,
         private MessageContextFactory $messageContextFactory,
+        private PayloadResolver $payloadResolver,
     ) {
     }
 
@@ -60,10 +62,17 @@ final readonly class MonitoringMiddleware implements MiddlewareInterface
     {
         $entry = StatusEntry::fromEnvelope($envelope, $stage);
 
+        if ($exception !== null) {
+            $entry = $entry->withError($exception);
+        }
+
+        // payload raportowany tylko na stanach producenta (tworzenie wystąpienia)
+        $entry = $entry->withPayload($this->payloadResolver->resolve($envelope->getMessage()));
+
         $this->publisher->publish(
             $occurrenceId,
             $this->messageContextFactory->createFrom($envelope->getMessage()),
-            $exception !== null ? $entry->withError($exception) : $entry,
+            $entry,
         );
     }
 

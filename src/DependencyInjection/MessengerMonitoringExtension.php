@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace SickDoggy\MessengerMonitoring\DependencyInjection;
 
+use SickDoggy\MessengerMonitoring\Attribute\PayloadResolver;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\Reference;
 
 final class MessengerMonitoringExtension extends Extension
 {
@@ -24,6 +28,19 @@ final class MessengerMonitoringExtension extends Extension
 
         (new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config')))
             ->load('services.yaml');
+
+        $this->registerPayloadResolver($container);
+    }
+
+    private function registerPayloadResolver(ContainerBuilder $container): void
+    {
+        $definition = new Definition(PayloadResolver::class);
+        // IGNORE_ON_INVALID_REFERENCE: gdy 'serializer' nie istnieje w aplikacji,
+        // argument jest pomijany i constructor przyjmie domyślne null
+        $definition->setArgument('$serializer', new Reference('serializer', ContainerInterface::IGNORE_ON_INVALID_REFERENCE));
+        $definition->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE));
+
+        $container->setDefinition(PayloadResolver::class, $definition);
     }
 
     public function getAlias(): string
