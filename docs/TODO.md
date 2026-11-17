@@ -4,8 +4,6 @@ Stan na 2026-11-18. Plik roboczy roadmapy; gdy pozycja zniknie — była zrobion
 
 ## Do zrobienia / poprawki techniczne biblioteki (wykaz z review 2026-11-17)
 
-1. **precyzja `occurredAt`** — dziś `DATE_ATOM` (sekundy); `received` i `handled` mieszczą się w jednej sekundzie → kolejność stanów w store jest zledefiniowana; przełączyć na `\DateTimeInterface::RFC3339_EXTENDED` (mikrosekundy). **Wpływ na kontrakt projekt #2 — zrobić przed premierą store.**
-2. **LICENSE** — composer.json deklaruje MIT, pliku nie ma (dokończyć przed publikacją).
 3. **edge `sync://` transport** — wiadomości obsłużone synchronicznie przez ten transport mają i `SentStamp`, i `HandledStamp` w jednym dispatchu; obecne `syncStage()` raportuje `sent` zamiast `handled`. Poprawić rozstrzyganie: `SentStamp` && brak `HandledStamp` → sent; oba/lub brak SentStamp → handled. Do pokrycia testem.
 4. **limit długości `errorMessage`** (np. ~4KB z markerem truncate) — exception message od Doctrine może być olbrzymi (query + params), oszczędza DB projektu #2.
 5. **opcja: `symfony/http-client` → `http-client-contracts` + suggest** — nie wymuszać konkretnego komponentu u konsumentów (obecna wersja wymusza; oba warianty idiomatyczne — decyzja).
@@ -27,3 +25,8 @@ Stan na 2026-11-18. Plik roboczy roadmapy; gdy pozycja zniknie — była zrobion
 ## Premiera
 
 14. **Packagist**: Submit `https://github.com/Sick-Doggy/messenger-monitoring-bundle`, konto `sick-doggy` (nie luktomczuk — username nie do zmiany), webhook GitHub→Packagist z Service hooks, tag `v0.1.0` po pozycjach 1–9, test `composer require sick-doggy/messenger-monitoring-bundle` w czystej aplikacji.
+
+## Zrobione
+
+- (2026-11-17) 1. occurredAt → RFC3339_EXTENDED (mikrosekundy; demo mock potwierdza .654+00:00)
+- (2026-11-17) 2. LICENSE (MIT)

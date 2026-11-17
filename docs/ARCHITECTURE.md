@@ -57,7 +57,7 @@ MonitoredMessage (nagłówek)
 
 **Multi-aplikacyjność**: `application` jest przy **każdym stanie**, nie tylko w nagłówku — wystąpienie wysłane przez aplikację A i obsłużone przez B raportują tę samą kolekcję (store scala), a każdy stan wie, kto go raportował. Nagłówek trzyma `application` jako origin-producenta (indeks, filtr w UX). `environment` (opcjonalne) rozdziela prod/staging/dev.
 
-Cykle nie są osobną encją — kolejne przebiegi wynikają z powtórzeń etapów; UX składa sekwencję po `occurredAt`.
+Cykle nie są osobną encją — kolejne przebiegi wynikają z powtórzeń etapów; UX składa sekwencję po `occurredAt`. **`occurredAt` to RFC3339 z mikrosekundami (RFC3339_EXTENDED)** — stany mieszczące się w tej samej sekundzie muszą mieć rozróżniowalne czasy.
 
 **monitoringId (id biznesowe)**: deweloper deklaruje go na klasie wiadomości atrybutem `#[MonitoringId('nazwa')]` — nazwa jest rozwiązywana jako publiczna metoda (priorytet) lub publiczne property; błędna konfiguracja atrybutu → `null` (fail-safe). Korelacja: `occurrenceId` = tożsamość techniczna wystąpienia, `monitoringId` = referencja biznesowa do wyszukiwania (może się powtarzać między wystąpieniami).
 
@@ -86,7 +86,7 @@ Biblioteka wysyła **POST przy każdej zmianie statusu** (`StatusChangePublisher
   "statuses": [
     {
       "stage": "sent",
-      "occurredAt": "2026-11-16T21:29:50+01:00",
+      "occurredAt": "2026-11-16T21:29:50.123+01:00",
       "application": "billing",
       "environment": "prod",
       "busName": "messenger.bus.default",
@@ -97,7 +97,7 @@ Biblioteka wysyła **POST przy każdej zmianie statusu** (`StatusChangePublisher
     },
     {
       "stage": "failed-retry",
-      "occurredAt": "2026-11-16T21:30:00+01:00",
+      "occurredAt": "2026-11-16T21:30:00.456+01:00",
       "application": "invoicing",
       "environment": "prod",
       "busName": "messenger.bus.default",

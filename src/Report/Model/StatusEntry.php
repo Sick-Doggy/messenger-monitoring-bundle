@@ -90,7 +90,9 @@ final readonly class StatusEntry
     {
         return [
             'stage' => $this->stage->value,
-            'occurredAt' => $this->occurredAt->format(DATE_ATOM),
+            // RFC3339_EXTENDED (mikrosekundy) — 'sent'+'received'+... często dzieją się w tej samej sekundzie,
+            // a store składa oś czasu po occurredAt; second-precision gubiłoby kolejność.
+            'occurredAt' => $this->occurredAt->format(\DateTimeInterface::RFC3339_EXTENDED),
             'application' => $this->application,
             'environment' => $this->environment,
             'busName' => $this->busName,
