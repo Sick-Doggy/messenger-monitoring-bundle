@@ -77,6 +77,8 @@ Na klasie wiadomości możesz użyć atrybutów (każde rozwiązanie = para: atr
 | `Tags` | etykiety do filtrowania | `#[Tags(['billing', 'critical'])]` |
 | `Payload` | zgoda na serializację message do store (Symfony Serializer; payload tylko na stanach producenta) | `#[Payload(groups: ['monitoring'])]` |
 
+Payload wymaga `composer require symfony/serializer symfony/property-access` i `framework: serializer: { enabled: true }`. Atrybut przy braku serializera rzuca `PayloadAttributeException` (fail-fast — do wyłapania w testach); błąd normalizacji konkretnego payloadu jest failure-safe (log + null).
+
 ```php
 use SickDoggy\MessengerMonitoring\Attribute\MonitoringId;
 use SickDoggy\MessengerMonitoring\Attribute\Name;

@@ -67,7 +67,9 @@ Cykle nie są osobną encją — kolejne przebiegi wynikają z powtórzeń etap�
 zserializowanego message'a (Symfony Serializer → JSON string). Payload jest **przypisany do stanów wytworzonych
 na stronie producenta** (sent/handled synchroniczna/send-failed) — pole `status_entry.payload` (TEXT/JSON, nullable).
 Wymagania po stronie aplikacji: `symfony/serializer` + `symfony/property-access` i `framework: serializer: { enabled: true }`;
-bez tego payload jest null (fail-safe, bez psucia aplikacji). Serializacja honoruje normalizers aplikacji i grupy.
+Brak serializera przy użyciu atrybutu → twarde `PayloadAttributeException` (błąd konfiguracji, fail-fast;
+developer ma go wykryć w testach) — decyzja użytkownika 2026-11-17. Błąd normalizacji konkretnego payloadu →
+failure-safe (log + null). Serializacja honoruje normalizers aplikacji i grupy.
 ## Kontrakt HTTP (ingest)
 
 `POST /api/lifecycles` (nazwa zasobu do ustalenia w store), payload `MessageLifecycle::toArray()`:
