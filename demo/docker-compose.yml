@@ -1,0 +1,41 @@
+# Demo messenger-monitoring w Dockerze.
+# Wolumen ../:/workspace (korzeń repo) jest istotny: path-repository w demo/composer.json
+# wskazuje "../" — biblioteka musi być widoczna wewnątrz kontenera.
+
+# Wspólne środowisko dla usług demo i consumer (YAML anchor)
+x-demo-env: &demo-env
+    MONITORING_APP_NAME: demo-app
+    MONITORING_ENVIRONMENT: docker
+    MONITORING_ENDPOINT_URL: http://mock-store:9988/api/lifecycles
+    APP_SECRET: demo-not-so-secret
+
+services:
+    composer:
+        image: composer:2
+        working_dir: /workspace/demo
+        volumes:
+            - ../:/workspace
+
+    mock-store:
+        image: php:8.2-cli
+        working_dir: /workspace/demo/mock-store
+        command: php -S 0.0.0.0:9988 router.php
+        ports:
+            - "9988:9988"
+        volumes:
+            - ../:/workspace
+
+    demo:
+        image: php:8.2-cli
+        working_dir: /workspace/demo
+        volumes:
+            - ../:/workspace
+        environment: *demo-env
+
+    consumer:
+        image: php:8.2-cli
+        working_dir: /workspace/demo
+        volumes:
+            - ../:/workspace
+        environment: *demo-env
+        command: php bin/console messenger:consume async

@@ -1,0 +1,10 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\Command\:
+        resource: '../src/Command/'
+
+    App\Handler\:
+        resource: '../src/Handler/'

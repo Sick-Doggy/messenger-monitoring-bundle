@@ -1,0 +1,8 @@
+/vendor/
+/demo/vendor/
+/demo/var/
+/phpstan.log
+/.phpunit.result.cache
+/.idea/
+/.phpunit.cache/
+.DS_Store

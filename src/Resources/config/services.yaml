@@ -1,0 +1,39 @@
+services:
+    MessengerMonitoring\Middleware\MonitoringMiddleware:
+        autowire: true
+        tags:
+            - { name: messenger.middleware }
+
+    MessengerMonitoring\EventSubscriber\MessageLifecycleSubscriber:
+        autowire: true
+        tags:
+            - { name: kernel.event_subscriber }
+
+    MessengerMonitoring\Report\HttpReporter:
+        autowire: true
+        arguments:
+            $endpoint: '%messenger_monitoring.endpoint%'
+            $apiKey: '%messenger_monitoring.api_key%'
+            $timeout: '%messenger_monitoring.timeout%'
+        bind:
+            Psr\Log\LoggerInterface: '@logger'
+
+    MessengerMonitoring\Report\LifecycleReporter: '@MessengerMonitoring\Report\HttpReporter'
+
+    MessengerMonitoring\Report\StatusChangePublisher:
+        autowire: true
+        arguments:
+            $application: '%messenger_monitoring.application%'
+            $environment: '%messenger_monitoring.environment%'
+
+    MessengerMonitoring\Attribute\MonitoringIdResolver:
+        autowire: true
+
+    MessengerMonitoring\Attribute\NameResolver:
+        autowire: true
+
+    MessengerMonitoring\Attribute\TagsResolver:
+        autowire: true
+
+    MessengerMonitoring\Attribute\MessageContextFactory:
+        autowire: true

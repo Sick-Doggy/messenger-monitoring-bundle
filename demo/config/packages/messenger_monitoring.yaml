@@ -1,0 +1,4 @@
+messenger_monitoring:
+    application: '%env(MONITORING_APP_NAME)%'
+    endpoint: '%env(MONITORING_ENDPOINT_URL)%'
+    environment: dev

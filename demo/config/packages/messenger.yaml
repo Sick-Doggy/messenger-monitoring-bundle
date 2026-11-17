@@ -1,0 +1,10 @@
+framework:
+    messenger:
+        transports:
+            async: 'doctrine://default?queue_name=async'
+        buses:
+            messenger.bus.default:
+                middleware:
+                    - MessengerMonitoring\Middleware\MonitoringMiddleware
+        routing:
+            App\Message\SendInvoice: async
