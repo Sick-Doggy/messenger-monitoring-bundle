@@ -6,13 +6,19 @@ namespace SickDoggy\MessengerMonitoring\Attribute;
 
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
+use SickDoggy\MessengerMonitoring\Exception\PayloadAttributeException;
 use Symfony\Component\Serializer\SerializerInterface;
 use Throwable;
 
 /**
  * Serializuje message do JSON-a (Symfony Serializer) na podstawie #[Payload].
- * Serializer jest wstrzykiwany warunkowo przez rozszerzenie bundla (nullable) —
- * brak pakietu serializer lub błąd normalizacji nie psują aplikacji: payload jest null.
+ * Serializer jest wstrzykiwany warunkowo przez rozszerzenie bundla (nullable).
+ *
+ * Zasady:
+ * - brak atrybutu #[Payload] → null (brak zgody na serializację);
+ * - atrybut jest, a serializator nie jest dostępny → twarde wyjątek PayloadAttributeException
+ *   (błąd konfiguracji — developer ma go wykryć w testach, nie "przypadkiem" na produkcji);
+ * - błąd normalizacji konkretnego payloadu → failure-safe (null + warning), bo zależy od danych.
  */
 final class PayloadResolver
 {
@@ -20,11 +26,6 @@ final class PayloadResolver
      * @var array<class-string, list<string>|null>
      */
     private array $groupsCache = [];
-
-    /**
-     * @var array<class-string, bool>
-     */
-    private array $missingSerializerWarned = [];
 
     public function __construct(
         private readonly ?SerializerInterface $serializer = null,
@@ -44,12 +45,7 @@ final class PayloadResolver
         }
 
         if ($this->serializer === null) {
-            if (!isset($this->missingSerializerWarned[$class])) {
-                $this->missingSerializerWarned[$class] = true;
-                $this->logger?->warning('messenger-monitoring: message "{class}" has #[Payload] attribute but Symfony Serializer is not available (install symfony/serializer + symfony/property-access and enable framework serializer)', ['class' => $class]);
-            }
-
-            return null;
+            throw PayloadAttributeException::missingSerializer($class);
         }
 
         try {
