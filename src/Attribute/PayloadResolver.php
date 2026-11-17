@@ -21,6 +21,11 @@ final class PayloadResolver
      */
     private array $groupsCache = [];
 
+    /**
+     * @var array<class-string, bool>
+     */
+    private array $missingSerializerWarned = [];
+
     public function __construct(
         private readonly ?SerializerInterface $serializer = null,
         private readonly ?LoggerInterface $logger = null,
@@ -34,7 +39,16 @@ final class PayloadResolver
         /** @var list<string>|null $groups */
         $groups = $this->groupsCache[$class] ??= $this->detectGroups($class);
 
-        if ($groups === null || $this->serializer === null) {
+        if ($groups === null) {
+            return null;
+        }
+
+        if ($this->serializer === null) {
+            if (!isset($this->missingSerializerWarned[$class])) {
+                $this->missingSerializerWarned[$class] = true;
+                $this->logger?->warning('messenger-monitoring: message "{class}" has #[Payload] attribute but Symfony Serializer is not available (install symfony/serializer + symfony/property-access and enable framework serializer)', ['class' => $class]);
+            }
+
             return null;
         }
 
