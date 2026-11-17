@@ -20,6 +20,7 @@ final class MessengerMonitoringExtension extends Extension
         $container->setParameter('messenger_monitoring.environment', $config['environment']);
         $container->setParameter('messenger_monitoring.api_key', $config['api_key']);
         $container->setParameter('messenger_monitoring.timeout', $config['timeout']);
+        $container->setParameter('messenger_monitoring.auto_register_bus_middleware', $config['auto_register_bus_middleware']);
 
         (new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config')))
             ->load('services.yaml');

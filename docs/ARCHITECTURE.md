@@ -15,6 +15,7 @@ Biblioteka nie zależy od API Platform ani od kodu store'a. Kontrakt jest wspó�
 
 - Wiadomość włącza monitoring implementując marker `SickDoggy\MessengerMonitoring\MonitoredMessage` — bez konfiguracji per bus/transport.
 - Główny mechanizm: **eventy Messenger**. Middleware pełni rolę pomocniczą (nadawanie korelacji).
+- **Auto-rejestracja middleware**: bundle przez `RegisterBusMiddlewarePass` (CompilerPass, TYPE_BEFORE_REMOVING — po MessengerPass) wstrzykuje `MonitoringMiddleware` do prefiksu `messenger.bus.*`; deweloper nie konfiguruje middleware. Wyłączenie: `auto_register_bus_middleware: false`. (Tag `messenger.middleware` nie istnieje jako mechanizm w Symfony 6.4 — FrameworkExtension/MessengerPass budują stacky wyłącznie z parametru `$busId.'.middleware'`; dlatego rejestracja jest przez pass, nie przez tag. Stack busa = `IteratorArgument` surowych `Reference`.)
 - **Korelacja**: `MonitoringStamp` z `occurrenceId` (UUID) doklejany w `MonitoringMiddleware` przy pierwszym przejściu przez bus (strona producenta). Stamp serializuje się w transporcie, więc producent i konsument raportują to samo wystąpienie. Guard: jeśli stamp istnieje (strona konsumpcji), middleware nie raportuje.
 - **Pełny cykl, w tym strona producenta** (decyzja: tak).
 - Raportowanie jest failure-safe: błąd POST trafia do loga (debug), nigdy nie psuje aplikacji.

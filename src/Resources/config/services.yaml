@@ -1,8 +1,6 @@
 services:
     SickDoggy\MessengerMonitoring\Middleware\MonitoringMiddleware:
         autowire: true
-        tags:
-            - { name: messenger.middleware }
 
     SickDoggy\MessengerMonitoring\EventSubscriber\MessageLifecycleSubscriber:
         autowire: true

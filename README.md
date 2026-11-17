@@ -48,22 +48,23 @@ Nazwa aplikacji trafia do **każdego stanu** w kolekcji (`application` + opcjona
 dzięki czemu wystąpienie wysłane przez jedną aplikację i obsłużone przez inną
 raportuje się z obu perspektyw.
 
-## Rejestracja middleware
+## Rejestracja middleware (automatyczna)
 
-Bundle taguje middleware (`messenger.middleware`), ale w wersji 6.x FrameworkBundle
-dołącza middleware otagowane do busów tylko wtedy, gdy bus ma jawną konfigurację.
-Zalecana forma (deterministyczna) — dodaj middleware do busów w `messenger.yaml`:
+NIE musisz nic dodawać do `messenger.yaml` — bundle sam wstrzykuje
+`MonitoringMiddleware` do wszystkich busów (`messenger.bus.*`) przez CompilerPass.
+
+Wyłączenie automatycznej rejestracji (i rejestracja ręczna w `messenger.yaml`):
 
 ```yaml
-framework:
-    messenger:
-        buses:
-            messenger.bus.default:
-                middleware:
-                    - SickDoggy\MessengerMonitoring\Middleware\MonitoringMiddleware
+messenger_monitoring:
+    auto_register_bus_middleware: false
+    # framework:
+    #     messenger:
+    #         buses:
+    #             messenger.bus.default:
+    #                 middleware:
+    #                     - SickDoggy\MessengerMonitoring\Middleware\MonitoringMiddleware
 ```
-
-Framework automatycznie dołącza na koniec `send_message` i `handle_message` — nie trzeba ich podawać.
 
 ## Deklaratywne atrybuty (SickDoggy\MessengerMonitoring\Attribute\)
 

@@ -47,6 +47,11 @@ final class Configuration implements ConfigurationInterface
             ->defaultValue(2.0)
             ->end();
 
+        $children->booleanNode('auto_register_bus_middleware')
+            ->defaultTrue()
+            ->info('Automatyczne dodanie MonitoringMiddleware do wszystkich busów messenger.bus.* (false — rejestracja ręczna w messenger.yaml)')
+            ->end();
+
         return $treeBuilder;
     }
 }
