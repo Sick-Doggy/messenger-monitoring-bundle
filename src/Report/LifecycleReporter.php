@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace MessengerMonitoring\Report;
+namespace SickDoggy\MessengerMonitoring\Report;
 
-use MessengerMonitoring\Report\Model\MessageLifecycle;
+use SickDoggy\MessengerMonitoring\Report\Model\MessageLifecycle;
 
 interface LifecycleReporter
 {

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace MessengerMonitoring\Middleware;
+namespace SickDoggy\MessengerMonitoring\Middleware;
 
-use MessengerMonitoring\Attribute\MessageContextFactory;
-use MessengerMonitoring\MonitoredMessage;
-use MessengerMonitoring\Report\Model\MessageStage;
-use MessengerMonitoring\Report\StatusChangePublisher;
-use MessengerMonitoring\Report\Model\StatusEntry;
-use MessengerMonitoring\Stamp\MonitoringStamp;
+use SickDoggy\MessengerMonitoring\Attribute\MessageContextFactory;
+use SickDoggy\MessengerMonitoring\MonitoredMessage;
+use SickDoggy\MessengerMonitoring\Report\Model\MessageStage;
+use SickDoggy\MessengerMonitoring\Report\StatusChangePublisher;
+use SickDoggy\MessengerMonitoring\Report\Model\StatusEntry;
+use SickDoggy\MessengerMonitoring\Stamp\MonitoringStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Symfony\Component\Messenger\Middleware\StackInterface;

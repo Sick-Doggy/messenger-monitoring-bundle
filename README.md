@@ -4,7 +4,7 @@ Bundle Symfony 6.4 monitorujący cykl życia wiadomości Symfony Messenger.
 
 ## Jak to działa
 
-Wiadomość włącza monitoring przez implementację interfejsu `MessengerMonitoring\MonitoredMessage`:
+Wiadomość włącza monitoring przez implementację interfejsu `SickDoggy\MessengerMonitoring\MonitoredMessage`:
 
 ```php
 final class SendInvoiceNotification implements MonitoredMessage
@@ -29,7 +29,7 @@ z jednym nowym wpisem. Store scala stany po `occurrenceId` (duplikaty po
 ## Instalacja
 
 ```bash
-composer require messenger-monitoring/messenger-monitoring
+composer require sick-doggy/messenger-monitoring-bundle
 ```
 
 ## Konfiguracja
@@ -60,12 +60,12 @@ framework:
         buses:
             messenger.bus.default:
                 middleware:
-                    - MessengerMonitoring\Middleware\MonitoringMiddleware
+                    - SickDoggy\MessengerMonitoring\Middleware\MonitoringMiddleware
 ```
 
 Framework automatycznie dołącza na koniec `send_message` i `handle_message` — nie trzeba ich podawać.
 
-## Deklaratywne atrybuty (MessengerMonitoring\Attribute\)
+## Deklaratywne atrybuty (SickDoggy\MessengerMonitoring\Attribute\)
 
 Na klasie wiadomości możesz użyć atrybutów (każde rozwiązanie = para: atrybut + resolver w `Attribute\`):
 
@@ -76,10 +76,10 @@ Na klasie wiadomości możesz użyć atrybutów (każde rozwiązanie = para: atr
 | `Tags` | etykiety do filtrowania | `#[Tags(['billing', 'critical'])]` |
 
 ```php
-use MessengerMonitoring\Attribute\MonitoringId;
-use MessengerMonitoring\Attribute\Name;
-use MessengerMonitoring\Attribute\Tags;
-use MessengerMonitoring\MonitoredMessage;
+use SickDoggy\MessengerMonitoring\Attribute\MonitoringId;
+use SickDoggy\MessengerMonitoring\Attribute\Name;
+use SickDoggy\MessengerMonitoring\Attribute\Tags;
+use SickDoggy\MessengerMonitoring\MonitoredMessage;
 
 #[MonitoringId('invoiceId')]
 #[Name('Wystawienie faktury')]
@@ -87,7 +87,7 @@ use MessengerMonitoring\MonitoredMessage;
 final class SendInvoice implements MonitoredMessage { ... }
 ```
 
-Wszystkie deklaratywne "rozwiązania" żyją w namespace `MessengerMonitoring\Attribute\`,
+Wszystkie deklaratywne "rozwiązania" żyją w namespace `SickDoggy\MessengerMonitoring\Attribute\`,
 każde jako para: atrybut + resolver.
 
 Wartości trafiają do nagłówka payloadu (`monitoringId`, `name`, `tags`) i na nagłówek

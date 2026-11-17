@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "242edf280e8c8de9845dc636bd0aee7e",
+    "content-hash": "3865509106dee5dc42ea3e18bf63cbb6",
     "packages": [
         {
             "name": "doctrine/dbal",
@@ -532,53 +532,6 @@
             "published-time": "2026-02-08T16:22:50+00:00"
         },
         {
-            "name": "messenger-monitoring/messenger-monitoring",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "..",
-                "reference": "9462e3b4832a431fe213b4bb1017f7769fcc4615"
-            },
-            "require": {
-                "php": ">=8.2",
-                "psr/log": "^3.0",
-                "symfony/config": "^6.4",
-                "symfony/dependency-injection": "^6.4",
-                "symfony/event-dispatcher": "^6.4",
-                "symfony/framework-bundle": "^6.4",
-                "symfony/http-client": "^6.4",
-                "symfony/messenger": "^6.4",
-                "symfony/uid": "^6.4",
-                "symfony/yaml": "^6.4"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^10.5"
-            },
-            "type": "symfony-bundle",
-            "extra": {
-                "branch-alias": {
-                    "dev-main": "1.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "MessengerMonitoring\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "MessengerMonitoring\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "Symfony Messenger message lifecycle monitoring bundle",
-            "transport-options": {
-                "relative": true
-            }
-        },
-        {
             "name": "psr/cache",
             "version": "3.0.0",
             "source": {
@@ -832,6 +785,59 @@
             },
             "time": "2024-09-11T13:17:53+00:00",
             "published-time": "2024-09-11T13:21:14+00:00"
+        },
+        {
+            "name": "sick-doggy/messenger-monitoring-bundle",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "..",
+                "reference": "e018a7b1940af208b230fff33f22ec5b1a45439a"
+            },
+            "require": {
+                "php": ">=8.2",
+                "psr/log": "^3.0",
+                "symfony/config": "^6.4",
+                "symfony/dependency-injection": "^6.4",
+                "symfony/event-dispatcher": "^6.4",
+                "symfony/framework-bundle": "^6.4",
+                "symfony/http-client": "^6.4",
+                "symfony/messenger": "^6.4",
+                "symfony/uid": "^6.4",
+                "symfony/yaml": "^6.4"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^10.5"
+            },
+            "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "SickDoggy\\MessengerMonitoring\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "SickDoggy\\MessengerMonitoring\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "phpstan": [
+                    "phpstan analyse"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Symfony Messenger message lifecycle monitoring bundle",
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "symfony/cache",
@@ -3989,7 +3995,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "messenger-monitoring/messenger-monitoring": 20
+        "sick-doggy/messenger-monitoring-bundle": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

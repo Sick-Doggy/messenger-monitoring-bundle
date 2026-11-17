@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace MessengerMonitoring\Report;
+namespace SickDoggy\MessengerMonitoring\Report;
 
-use MessengerMonitoring\Report\Model\MessageContext;
-use MessengerMonitoring\Report\Model\MessageLifecycle;
-use MessengerMonitoring\Report\Model\StatusEntry;
+use SickDoggy\MessengerMonitoring\Report\Model\MessageContext;
+use SickDoggy\MessengerMonitoring\Report\Model\MessageLifecycle;
+use SickDoggy\MessengerMonitoring\Report\Model\StatusEntry;
 
 /**
  * Wysyła do store'a POST przy każdej zmianie statusu wystąpienia —

@@ -1,15 +1,15 @@
 services:
-    MessengerMonitoring\Middleware\MonitoringMiddleware:
+    SickDoggy\MessengerMonitoring\Middleware\MonitoringMiddleware:
         autowire: true
         tags:
             - { name: messenger.middleware }
 
-    MessengerMonitoring\EventSubscriber\MessageLifecycleSubscriber:
+    SickDoggy\MessengerMonitoring\EventSubscriber\MessageLifecycleSubscriber:
         autowire: true
         tags:
             - { name: kernel.event_subscriber }
 
-    MessengerMonitoring\Report\HttpReporter:
+    SickDoggy\MessengerMonitoring\Report\HttpReporter:
         autowire: true
         arguments:
             $endpoint: '%messenger_monitoring.endpoint%'
@@ -18,22 +18,22 @@ services:
         bind:
             Psr\Log\LoggerInterface: '@logger'
 
-    MessengerMonitoring\Report\LifecycleReporter: '@MessengerMonitoring\Report\HttpReporter'
+    SickDoggy\MessengerMonitoring\Report\LifecycleReporter: '@SickDoggy\MessengerMonitoring\Report\HttpReporter'
 
-    MessengerMonitoring\Report\StatusChangePublisher:
+    SickDoggy\MessengerMonitoring\Report\StatusChangePublisher:
         autowire: true
         arguments:
             $application: '%messenger_monitoring.application%'
             $environment: '%messenger_monitoring.environment%'
 
-    MessengerMonitoring\Attribute\MonitoringIdResolver:
+    SickDoggy\MessengerMonitoring\Attribute\MonitoringIdResolver:
         autowire: true
 
-    MessengerMonitoring\Attribute\NameResolver:
+    SickDoggy\MessengerMonitoring\Attribute\NameResolver:
         autowire: true
 
-    MessengerMonitoring\Attribute\TagsResolver:
+    SickDoggy\MessengerMonitoring\Attribute\TagsResolver:
         autowire: true
 
-    MessengerMonitoring\Attribute\MessageContextFactory:
+    SickDoggy\MessengerMonitoring\Attribute\MessageContextFactory:
         autowire: true

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MessengerMonitoring\Report\Model;
+namespace SickDoggy\MessengerMonitoring\Report\Model;
 
 /**
  * Deklaratywny kontekst wiadomości: wszystko, co o niej wiadomo poza klasą —

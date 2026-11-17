@@ -13,7 +13,7 @@ Biblioteka nie zależy od API Platform ani od kodu store'a. Kontrakt jest wspó�
 
 ## Koncepcja instrumentacji (biblioteka)
 
-- Wiadomość włącza monitoring implementując marker `MessengerMonitoring\MonitoredMessage` — bez konfiguracji per bus/transport.
+- Wiadomość włącza monitoring implementując marker `SickDoggy\MessengerMonitoring\MonitoredMessage` — bez konfiguracji per bus/transport.
 - Główny mechanizm: **eventy Messenger**. Middleware pełni rolę pomocniczą (nadawanie korelacji).
 - **Korelacja**: `MonitoringStamp` z `occurrenceId` (UUID) doklejany w `MonitoringMiddleware` przy pierwszym przejściu przez bus (strona producenta). Stamp serializuje się w transporcie, więc producent i konsument raportują to samo wystąpienie. Guard: jeśli stamp istnieje (strona konsumpcji), middleware nie raportuje.
 - **Pełny cykl, w tym strona producenta** (decyzja: tak).
@@ -60,7 +60,7 @@ Cykle nie są osobną encją — kolejne przebiegi wynikają z powtórzeń etap�
 
 **monitoringId (id biznesowe)**: deweloper deklaruje go na klasie wiadomości atrybutem `#[MonitoringId('nazwa')]` — nazwa jest rozwiązywana jako publiczna metoda (priorytet) lub publiczne property; błędna konfiguracja atrybutu → `null` (fail-safe). Korelacja: `occurrenceId` = tożsamość techniczna wystąpienia, `monitoringId` = referencja biznesowa do wyszukiwania (może się powtarzać między wystąpieniami).
 
-**name i tags**: kolejne deklaratywne rozwiązania w `MessengerMonitoring\Attribute\` (para atrybut+resolver): `#[Name('...')]` — własna nazwa wystąpienia (UX zamiast className), `#[Tags([...])]` — etykiety do filtrowania. Wszystkie trzy wartości składane są przez `MessageContextFactory` do `MessageContext` (className + monitoringId + name + tags) i przechodzą w nagłówku każdego POST-u. Store: `monitoring_id`, `name` (nullable, indeksowane), `tags` (kolekcja) — upsert: pierwsze niepuste trafienie, null/pusta lista nie nadpisuje.
+**name i tags**: kolejne deklaratywne rozwiązania w `SickDoggy\MessengerMonitoring\Attribute\` (para atrybut+resolver): `#[Name('...')]` — własna nazwa wystąpienia (UX zamiast className), `#[Tags([...])]` — etykiety do filtrowania. Wszystkie trzy wartości składane są przez `MessageContextFactory` do `MessageContext` (className + monitoringId + name + tags) i przechodzą w nagłówku każdego POST-u. Store: `monitoring_id`, `name` (nullable, indeksowane), `tags` (kolekcja) — upsert: pierwsze niepuste trafienie, null/pusta lista nie nadpisuje.
 
 ## Kontrakt HTTP (ingest)
 

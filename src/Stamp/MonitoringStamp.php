@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MessengerMonitoring\Stamp;
+namespace SickDoggy\MessengerMonitoring\Stamp;
 
 use Symfony\Component\Messenger\Stamp\StampInterface;
 

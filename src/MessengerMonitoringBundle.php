@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MessengerMonitoring;
+namespace SickDoggy\MessengerMonitoring;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

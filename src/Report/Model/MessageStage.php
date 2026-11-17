@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MessengerMonitoring\Report\Model;
+namespace SickDoggy\MessengerMonitoring\Report\Model;
 
 enum MessageStage: string
 {

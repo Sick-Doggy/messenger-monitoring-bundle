@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
-use MessengerMonitoring\MessengerMonitoringBundle;
+use SickDoggy\MessengerMonitoring\MessengerMonitoringBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;

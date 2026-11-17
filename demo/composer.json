@@ -1,11 +1,11 @@
 {
-    "name": "messenger-monitoring/demo",
-    "description": "Demo aplikacji korzystającej z messenger-monitoring",
+    "name": "sick-doggy/messenger-monitoring-bundle-demo",
+    "description": "Demo aplikacji korzystającej z sick-doggy/messenger-monitoring-bundle",
     "type": "project",
     "license": "MIT",
     "require": {
         "php": ">=8.2",
-        "messenger-monitoring/messenger-monitoring": "@dev",
+        "sick-doggy/messenger-monitoring-bundle": "@dev",
         "symfony/framework-bundle": "^6.4",
         "symfony/console": "^6.4",
         "symfony/dotenv": "^6.4",

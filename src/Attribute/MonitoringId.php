@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MessengerMonitoring\Attribute;
+namespace SickDoggy\MessengerMonitoring\Attribute;
 
 use Attribute;
 

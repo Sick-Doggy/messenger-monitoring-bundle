@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MessengerMonitoring\Report\Model;
+namespace SickDoggy\MessengerMonitoring\Report\Model;
 
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\BusNameStamp;

@@ -1,5 +1,5 @@
 {
-    "name": "messenger-monitoring/messenger-monitoring",
+    "name": "sick-doggy/messenger-monitoring-bundle",
     "description": "Symfony Messenger message lifecycle monitoring bundle",
     "type": "symfony-bundle",
     "license": "MIT",
@@ -27,12 +27,12 @@
     },
     "autoload": {
         "psr-4": {
-            "MessengerMonitoring\\": "src/"
+            "SickDoggy\\MessengerMonitoring\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "MessengerMonitoring\\Tests\\": "tests/"
+            "SickDoggy\\MessengerMonitoring\\Tests\\": "tests/"
         }
     },
     "extra": {

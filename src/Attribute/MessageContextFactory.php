@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace MessengerMonitoring\Attribute;
+namespace SickDoggy\MessengerMonitoring\Attribute;
 
-use MessengerMonitoring\Report\Model\MessageContext;
+use SickDoggy\MessengerMonitoring\Report\Model\MessageContext;
 
 /**
  * Składa kontekst wiadomości ze wszystkich deklaratywnych atrybutów.
