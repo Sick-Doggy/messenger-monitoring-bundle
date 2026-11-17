@@ -97,6 +97,26 @@ każde jako para: atrybut + resolver.
 Wartości trafiają do nagłówka payloadu (`monitoringId`, `name`, `tags`) i na nagłówek
 w store z upsert-semantyką (pierwsze niepuste trafienie; null/pusta lista nie nadpisuje).
 
+## Jak działa payload (mutowalny message, retry)
+
+Payload jest snapshotem **stanu obiektu w chwili danego stanu**. Handler może mutować wiadomość —
+przykład w demie (`demo:process` + mutowalna `ProcessInvoice`):
+
+| Moment | Co widzi serializator | Może się różnić? |
+|---|---|---|
+| `sent` (producent, dispatch) | stan wejścia do transportu ("na szynie") | baza odniesienia |
+| `received` (konsument, inny proces) | stan po deserializacji = wersja `sent` | nie (round-trip) |
+| `handled`/`failed` (konsument) | stan **po** wykonaniu handlera / w momencie wyjątku | **tak** — handler mógł mutować |
+| przebieg 2 (retry) | retry wysyła kopertę **z mutacją z poprzedniej próby** | **tak** |
+
+Dwie uwagi: (1) payload raportujemy tylko na stanach producenta, więc w store widzisz zawsze
+oryginalną treść wysłaną — mutacje handlera nie wchodzą do payloadów; (2) re-wysyłka retry
+omija middleware busa (idzie wprost do transportu), więc nie generuje nowego stanu `sent` —
+zmutowaną wersję kolejki zobaczysz dopiero jako `received` kolejnego przebiegu.
+
+Dobra praktyka: `monitoringId` (i atrybuty deklaratywne) trzymaj w niemutowalnych polach,
+żeby korelacja nie "dryfowała" między przebiegami.
+
 ## Jakość kodu (wymagane)
 
 Analiza statyczna **PHPStan poziom 8 jest wymagana** — kod przechodzi z **zerem błędów**,

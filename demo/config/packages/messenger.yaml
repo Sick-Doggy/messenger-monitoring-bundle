@@ -6,3 +6,4 @@ framework:
       messenger.bus.default: {}
     routing:
       App\Message\SendInvoice: async
+      App\Message\ProcessInvoice: async
