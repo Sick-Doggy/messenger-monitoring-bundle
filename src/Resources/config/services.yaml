@@ -38,3 +38,16 @@ services:
 
     SickDoggy\MessengerMonitoring\Attribute\PayloadResolver:
         autowire: true
+
+    SickDoggy\MessengerMonitoring\Attribute\ProcessIdResolver:
+        autowire: true
+
+    SickDoggy\MessengerMonitoring\Context\ProcessContext:
+        autowire: true
+
+    SickDoggy\MessengerMonitoring\EventSubscriber\HttpProcessIdSubscriber:
+        autowire: true
+        arguments:
+            $headerName: '%messenger_monitoring.process_header_name%'
+        tags:
+            - { name: kernel.event_subscriber }

@@ -49,6 +49,7 @@ MonitoredMessage (nagłówek)
  ├─ className
  ├─ monitoringId   = identyfikator biznesowy od dewelopera (nullable, indeks;filtr główny w UX)
  ├─ name           = własna nazwa wystąpienia (nullable; wyświetlana w UX zamiast className)
+ ├─ processId      = identyfikator procesu (sprawy; nullable; grupuje WIELE wystąpień/message'ów)
  ├─ tags[]         = etykiety dewelopera (kolekcja; do filtrowania w UX)
  ├─ application    = aplikacja-producent (origin; wyliczany przez store z pierwszego wpisu `sent`, indeksowany)
  └─ statuses[]     (kolekcja; ten sam stage może wystąpić wielokrotnie — retry)
@@ -60,6 +61,8 @@ MonitoredMessage (nagłówek)
 Cykle nie są osobną encją — kolejne przebiegi wynikają z powtórzeń etapów; UX składa sekwencję po `occurredAt`. **`occurredAt` to RFC3339 z mikrosekundami (RFC3339_EXTENDED)** — stany mieszczące się w tej samej sekundzie muszą mieć rozróżniowalne czasy.
 
 **monitoringId (id biznesowe)**: deweloper deklaruje go na klasie wiadomości atrybutem `#[MonitoringId('nazwa')]` — nazwa jest rozwiązywana jako publiczna metoda (priorytet) lub publiczne property; błędna konfiguracja atrybutu → `null` (fail-safe). Korelacja: `occurrenceId` = tożsamość techniczna wystąpienia, `monitoringId` = referencja biznesowa do wyszukiwania (może się powtarzać między wystąpieniami).
+
+**processId (sprawy)**: proces to wiadomość grupująca wiele wystąpień (i wiele klas message). Źródła: jawny `ProcessIdStamp` > ambient (handler obsługiwany w kontekście procesu — worker enter/exit symetryczny) > atrybut `#[ProcessId]` na klasie. Propagacja przez transport tak jak MonitoringStamp; między aplikacjami po HTTP: nagłówek `Process-Id` (realizacja przez `HttpProcessIdSubscriber`). Store: pole nagłówka (`monitored_message.process_id`, index); przyszły UX grupuje sprawy.
 
 **name i tags**: kolejne deklaratywne rozwiązania w `SickDoggy\MessengerMonitoring\Attribute\` (para atrybut+resolver): `#[Name('...')]` — własna nazwa wystąpienia (UX zamiast className), `#[Tags([...])]` — etykiety do filtrowania. Wszystkie trzy wartości składane są przez `MessageContextFactory` do `MessageContext` (className + monitoringId + name + tags) i przechodzą w nagłówku każdego POST-u. Store: `monitoring_id`, `name` (nullable, indeksowane), `tags` (kolekcja) — upsert: pierwsze niepuste trafienie, null/pusta lista nie nadpisuje.
 

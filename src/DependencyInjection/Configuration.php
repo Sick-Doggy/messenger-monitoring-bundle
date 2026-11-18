@@ -52,6 +52,11 @@ final class Configuration implements ConfigurationInterface
             ->info('Automatyczne dodanie MonitoringMiddleware do wszystkich busów messenger.bus.* (false — rejestracja ręczna w messenger.yaml)')
             ->end();
 
+        $children->scalarNode('process_header_name')
+            ->defaultValue('Process-Id')
+            ->info('Nazwa nagłówka HTTP, z którego nasłuchująca sekcja czyta processId (np. Process-Id)')
+            ->end();
+
         return $treeBuilder;
     }
 }

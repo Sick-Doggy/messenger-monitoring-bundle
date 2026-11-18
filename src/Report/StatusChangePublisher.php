@@ -21,12 +21,13 @@ final readonly class StatusChangePublisher
     ) {
     }
 
-    public function publish(string $occurrenceId, MessageContext $context, StatusEntry $entry): void
+    public function publish(string $occurrenceId, MessageContext $context, StatusEntry $entry, ?string $processId = null): void
     {
         $this->reporter->publish(new MessageLifecycle(
             occurrenceId: $occurrenceId,
             className: $context->className,
             monitoringId: $context->monitoringId,
+            processId: $processId,
             name: $context->name,
             tags: $context->tags,
             statuses: [$entry->withContext($this->application, $this->environment)],
