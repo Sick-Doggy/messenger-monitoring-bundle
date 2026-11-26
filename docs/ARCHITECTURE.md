@@ -49,6 +49,7 @@ MonitoredMessage (nagłówek)
  ├─ className
  ├─ monitoringId   = identyfikator biznesowy od dewelopera (nullable, indeks;filtr główny w UX)
  ├─ name           = własna nazwa wystąpienia (nullable; wyświetlana w UX zamiast className)
+ ├─ processId      = identyfikator procesu (sprawy; nullable; grupuje WIELE wystąpień/message'ów)
  ├─ tags[]         = etykiety dewelopera (kolekcja; do filtrowania w UX)
  ├─ application    = aplikacja-producent (origin; wyliczany przez store z pierwszego wpisu `sent`, indeksowany)
  └─ statuses[]     (kolekcja; ten sam stage może wystąpić wielokrotnie — retry)
@@ -61,6 +62,8 @@ Cykle nie są osobną encją — kolejne przebiegi wynikają z powtórzeń etap�
 
 **monitoringId (id biznesowe)**: deweloper deklaruje go na klasie wiadomości atrybutem `#[MonitoringId('nazwa')]` — nazwa jest rozwiązywana jako publiczna metoda (priorytet) lub publiczne property; błędna konfiguracja atrybutu → `null` (fail-safe). Korelacja: `occurrenceId` = tożsamość techniczna wystąpienia, `monitoringId` = referencja biznesowa do wyszukiwania (może się powtarzać między wystąpieniami).
 
+**processId (sprawy)**: proces to wiadomość grupująca wiele wystąpień (i wiele klas message). Źródła: jawny `ProcessIdStamp` > ambient (handler obsługiwany w kontekście procesu — worker enter/exit symetryczny) > atrybut `#[ProcessId]` na klasie. Propagacja przez transport tak jak MonitoringStamp; między aplikacjami po HTTP: nagłówek `Process-Id` (realizacja przez `HttpProcessIdSubscriber`). Store: pole nagłówka (`monitored_message.process_id`, index); przyszły UX grupuje sprawy.
+
 **name i tags**: kolejne deklaratywne rozwiązania w `SickDoggy\MessengerMonitoring\Attribute\` (para atrybut+resolver): `#[Name('...')]` — własna nazwa wystąpienia (UX zamiast className), `#[Tags([...])]` — etykiety do filtrowania. Wszystkie trzy wartości składane są przez `MessageContextFactory` do `MessageContext` (className + monitoringId + name + tags) i przechodzą w nagłówku każdego POST-u. Store: `monitoring_id`, `name` (nullable, indeksowane), `tags` (kolekcja) — upsert: pierwsze niepuste trafienie, null/pusta lista nie nadpisuje.
 
 **payload (opcjonalne, atrybut #[Payload(groups?: [...])])**: deweloper wyraża zgodę na przesłanie
@@ -72,48 +75,33 @@ developer ma go wykryć w testach) — decyzja użytkownika 2026-11-17. Błąd n
 failure-safe (log + null). Serializacja honoruje normalizers aplikacji i grupy.
 ## Kontrakt HTTP (ingest)
 
-`POST /api/lifecycles` (nazwa zasobu do ustalenia w store), payload `MessageLifecycle::toArray()`:
+Kontrakt realizuje spec OpenAPI generowana przez API Platform (eksport wersjonowany przy release; **v3**, 2026-11-20). Ingest = dwa endpointy (zasoby `Monitor` + `MonitorState` zagnieżdżony):
 
-Biblioteka wysyła **POST przy każdej zmianie statusu** (`StatusChangePublisher`) — payload to nagłówek (occurrenceId, className) + kolekcja `statuses` **z jednym wpisem** (nowym stanem). Scalenie całej kolekcji cyklu życia robi store po `occurrenceId`; dzięki temu każdy stan dolatuje w czasie rzeczywistym, a buforowanie nie jest potrzebne (crash procesu nie traci danych).
+- `POST /api/monitors` — upsert nagłówka wystąpienia po `occurrenceId` (ciało: `occurrenceId`, `className`, `monitoringId?`, `processId?`, `name?`, `tags[]`).
+- `POST /api/monitors/{occurrenceId}/states` — idempotentne dopisanie stanu (ciało: `stage`, `occurredAt`, `application`, `environment?`, `busName?`, `transportName?`, `handlerName?`, `errorClass?`, `errorMessage?`).
+
+Biblioteka wysyła **POST stanu przy każdej zmianie statusu** (`StatusChangePublisher` → `StoreLifecycleReporter`) — dzięki temu każdy stan dolatuje w czasie rzeczywistym, a buforowanie nie jest potrzebne (crash procesu nie traci danych). Przepływ: najpierw POST stanu; **HTTP 404 → upsert nagłówka → ponowny POST stanu**. Steady-state konsumenta = 1 wywołanie na stan; jednocześnie nagłówek zgłasza się od producenta przy pierwszym stanie i samo-leczy przypadki zgubionego nagłówka. Nieatomiczność (nagłówek dolatł, stan nie) goi się sama — kolejny stan znów trafia w fallback, upsert jest idempotentny.
 
 ```json
 {
-  "occurrenceId": "uuid-v4",
-  "className": "App\\Message\\SendInvoice",
-  "monitoringId": "INV-RETRY",
-  "name": "Wystawienie faktury",
-  "tags": ["billing", "critical"],
-  "statuses": [
-    {
-      "stage": "sent",
-      "occurredAt": "2026-11-16T21:29:50.123+01:00",
-      "application": "billing",
-      "environment": "prod",
-      "busName": "messenger.bus.default",
-      "transportName": null,
-      "handlerName": null,
-      "errorClass": null,
-      "errorMessage": null
-    },
-    {
-      "stage": "failed-retry",
-      "occurredAt": "2026-11-16T21:30:00.456+01:00",
-      "application": "invoicing",
-      "environment": "prod",
-      "busName": "messenger.bus.default",
-      "transportName": "async",
-      "handlerName": "App\\Handler\\SendInvoiceHandler",
-      "errorClass": "App\\Exception\\FlakyException",
-      "errorMessage": "..."
-    }
-  ]
+  "stage": "sent",
+  "occurredAt": "2026-11-16T21:29:50.123+01:00",
+  "application": "billing",
+  "environment": "prod",
+  "busName": "messenger.bus.default",
+  "transportName": null,
+  "handlerName": null,
+  "errorClass": null,
+  "errorMessage": null
 }
 ```
 
-- Semantyka: **upsert nagłówka po `occurrenceId` + dopisywanie stanu do kolekcji** — payload ma jeden wpis, ale kontrakt (nagłówek + kolekcja) pozostaje zgodny z modelem danych.
-- **Idempotencja**: klucz duplikatu = (occurrenceId + stage + occurredAt + application). Ponowny POST → zignorowany duplikat, nie podwojony wpis.
+- **Idempotencja**: klucz duplikatu = (occurrenceId + stage + occurredAt + application). Ponowny POST stanu → zwrot istniejącego wpisu z tym samym `id`, nie podwojony wpis.
+- Dopisanie stanu dla nieistniejącego nagłówka → HTTP 404 (fallback biblioteki opiera się na tym zachowaniu — potwierdzone do zespołu API).
 - Format: zwykły JSON (`application/json`), nie JSON-LD, dla endpointów ingestu.
-- Uwierzytelnianie: nagłówek `X-Api-Key` (konfigurowalny w bibliotece).
+- Uwierzytelnianie: nagłówek `X-Api-Key` — **wymagany do wszystkich operacji** (decyzja 2026-11-20); `api_key` w bibliotece obowiązkowy (fail-fast w konfiguracji).
+- Odczyt (UX): kolekcja nagłówków `/api/monitors` z filtrami `monitoringId`/`processId`/`tags` (AND); historia stanów `/api/monitors/{occurrenceId}/states` chronologicznie, filtry `stage` (OR) i `application`.
+- Zgłoszone zespołowi API (braki spec v3 względem modelu danych): pole `application` jako origin-producenta w nagłówku Monitora, pole `payload` na MonitorState, sprecyzowanie kodu odpowiedzi duplikatu (200/201).
 
 ## Zasoby / kolekcje po stronie store (do przeglądu przy projektowaniu)
 
@@ -129,9 +117,9 @@ Metryki transportowe: głębokość kolejek, czas oczekiwania w kolejce, agregat
 
 ```yaml
 messenger_monitoring:
-    application: '%env(MONITORING_APP_NAME)%'   # wymagane: nazwa aplikacji raportującej
-    endpoint: '%env(MONITORING_ENDPOINT_URL)%'   # wymagane
-    environment: '%env(MONITORING_ENVIRONMENT)%' # opcjonalne: prod/staging/dev
-    api_key: '%env(MONITORING_API_KEY)%'         # opcjonalny
-    timeout: '2.0'                               # opcjonalny, sekundy
+    application: '%env(MONITORING_APP_NAME)%'     # wymagane: nazwa aplikacji raportującej
+    endpoint: '%env(MONITORING_ENDPOINT_URL)%'    # wymagane: BASE URL store'a (doklejane /api/monitors)
+    api_key: '%env(MONITORING_API_KEY)%'          # wymagane: X-Api-Key
+    environment: '%env(MONITORING_ENVIRONMENT)%'  # opcjonalne: prod/staging/dev
+    timeout: '2.0'                                # opcjonalny, sekundy
 ```

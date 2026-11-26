@@ -17,6 +17,7 @@ final readonly class MessageLifecycle
         public string $occurrenceId,
         public string $className,
         public ?string $monitoringId = null,
+        public ?string $processId = null,
         public ?string $name = null,
         public array $tags = [],
         public array $statuses = [],
@@ -32,6 +33,7 @@ final readonly class MessageLifecycle
             'occurrenceId' => $this->occurrenceId,
             'className' => $this->className,
             'monitoringId' => $this->monitoringId,
+            'processId' => $this->processId,
             'name' => $this->name,
             'tags' => $this->tags,
             'statuses' => array_map(

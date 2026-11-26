@@ -76,6 +76,7 @@ Na klasie wiadomości możesz użyć atrybutów (każde rozwiązanie = para: atr
 | `Name` | własna nazwa wystąpienia (w store/UX zamiast nazwy klasy) | `#[Name('Wystawienie faktury')]` |
 | `Tags` | etykiety do filtrowania | `#[Tags(['billing', 'critical'])]` |
 | `Payload` | zgoda na serializację message do store (Symfony Serializer; payload tylko na stanach producenta) | `#[Payload(groups: ['monitoring'])]` |
+| `ProcessId` | identyfikator procesu (sprawy) — grupujący wiele message'ów | `#[ProcessId('orderId')]` |
 
 Payload wymaga `composer require symfony/serializer symfony/property-access` i `framework: serializer: { enabled: true }`. Atrybut przy braku serializera rzuca `PayloadAttributeException` (fail-fast — do wyłapania w testach); błąd normalizacji konkretnego payloadu jest failure-safe (log + null).
 
@@ -116,6 +117,21 @@ zmutowaną wersję kolejki zobaczysz dopiero jako `received` kolejnego przebiegu
 
 Dobra praktyka: `monitoringId` (i atrybuty deklaratywne) trzymaj w niemutowalnych polach,
 żeby korelacja nie "dryfowała" między przebiegami.
+
+## Propagacja procesu (processId)
+
+Jedno wystąpienie sprawy (np. sprawa z systemów biznesowych) może obejmować wiele
+message'ów — w tym wiadomości wysyłane **podczas handlerów** ("1 message zakłada sprawę,
+drugi przesyła pliki"). Źródła processId (priorytet):
+
+1. jawny stamp na dispatchu: `$bus->dispatch($msg, [new ProcessIdStamp('SPR-1')])`,
+2. ambient: gdy handler (consumer) jest obsługiwany właśnie dla message z procesem,
+   nowe dispatchowane message automatycznie go dziedziczą,
+3. atrybut `#[ProcessId('orderId')]` — klasa wywóluje proces własną wartością (metoda lub publiczne property),
+4. HTTP brzeg: nagłówek `Process-Id` (`HttpProcessIdSubscriber` na `kernel.request`; czyści się na `kernel.finish_request`).
+
+`processId` trafia do nagłówka każdego POST-a; store grupuje wystąpienia po nim (widok sprawy).
+Worker czyści ambient symetrycznie (try/finally) — kolejne wiadomości bez stampu nie dziedziczą go.
 
 ## Jakość kodu (wymagane)
 

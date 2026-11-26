@@ -1,7 +1,14 @@
 framework:
   messenger:
     transports:
-      async: doctrine://default?queue_name=async
+      async:
+        dsn: doctrine://default?queue_name=async
+        # jawna polityka: przy błędzie handlera 3 powtórki (potem failed-final;
+        # raportowane przez monitoring jako failed-retry / failed-final)
+        retry_strategy:
+          max_retries: 3
+          delay: 500
+          multiplier: 2
     buses:
       messenger.bus.default: {}
     routing:

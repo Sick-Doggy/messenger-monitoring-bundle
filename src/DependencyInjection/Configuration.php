@@ -31,7 +31,7 @@ final class Configuration implements ConfigurationInterface
         $children->scalarNode('endpoint')
             ->isRequired()
             ->cannotBeEmpty()
-            ->info('Adres POST migawek cyklu życia w store (API Platform)')
+            ->info('Base URL store\'a (np. https://store.example.com) — klient dokleja /api/monitors')
             ->end();
 
         $children->scalarNode('environment')
@@ -40,7 +40,9 @@ final class Configuration implements ConfigurationInterface
             ->end();
 
         $children->scalarNode('api_key')
-            ->defaultNull()
+            ->isRequired()
+            ->cannotBeEmpty()
+            ->info('Klucz X-Api-Key — wszystkie operacje API store\'a go wymagają')
             ->end();
 
         $children->floatNode('timeout')
@@ -50,6 +52,11 @@ final class Configuration implements ConfigurationInterface
         $children->booleanNode('auto_register_bus_middleware')
             ->defaultTrue()
             ->info('Automatyczne dodanie MonitoringMiddleware do wszystkich busów messenger.bus.* (false — rejestracja ręczna w messenger.yaml)')
+            ->end();
+
+        $children->scalarNode('process_header_name')
+            ->defaultValue('Process-Id')
+            ->info('Nazwa nagłówka HTTP, z którego nasłuchująca sekcja czyta processId (np. Process-Id)')
             ->end();
 
         return $treeBuilder;

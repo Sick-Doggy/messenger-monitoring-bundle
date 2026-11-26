@@ -6,11 +6,14 @@ namespace SickDoggy\MessengerMonitoring\Middleware;
 
 use SickDoggy\MessengerMonitoring\Attribute\MessageContextFactory;
 use SickDoggy\MessengerMonitoring\Attribute\PayloadResolver;
+use SickDoggy\MessengerMonitoring\Attribute\ProcessIdResolver;
+use SickDoggy\MessengerMonitoring\Context\ProcessContext;
 use SickDoggy\MessengerMonitoring\MonitoredMessage;
 use SickDoggy\MessengerMonitoring\Report\Model\MessageStage;
 use SickDoggy\MessengerMonitoring\Report\StatusChangePublisher;
 use SickDoggy\MessengerMonitoring\Report\Model\StatusEntry;
 use SickDoggy\MessengerMonitoring\Stamp\MonitoringStamp;
+use SickDoggy\MessengerMonitoring\Stamp\ProcessIdStamp;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Middleware\MiddlewareInterface;
 use Symfony\Component\Messenger\Middleware\StackInterface;
@@ -24,6 +27,8 @@ final readonly class MonitoringMiddleware implements MiddlewareInterface
         private StatusChangePublisher $publisher,
         private MessageContextFactory $messageContextFactory,
         private PayloadResolver $payloadResolver,
+        private ProcessIdResolver $processIdResolver,
+        private ProcessContext $processContext,
     ) {
     }
 
@@ -37,14 +42,18 @@ final readonly class MonitoringMiddleware implements MiddlewareInterface
             return $this->monitorSend($envelope, $stack);
         }
 
-        // strona konsumpcji: korelacja już istnieje, stany raportuje subscriber
-        return $stack->next()->handle($envelope, $stack);
+        return $this->monitorConsume($envelope, $stack);
     }
 
     private function monitorSend(Envelope $envelope, StackInterface $stack): Envelope
     {
         $occurrenceId = Uuid::v4()->toRfc4122();
         $envelope = $envelope->with(new MonitoringStamp($occurrenceId));
+
+        $processId = $this->resolveProcessId($envelope);
+        if ($processId !== null) {
+            $envelope = $envelope->with(new ProcessIdStamp($processId));
+        }
 
         try {
             $result = $stack->next()->handle($envelope, $stack);
@@ -56,6 +65,33 @@ final readonly class MonitoringMiddleware implements MiddlewareInterface
         $this->publish($occurrenceId, $result, $this->syncStage($result));
 
         return $result;
+    }
+
+    private function monitorConsume(Envelope $envelope, StackInterface $stack): Envelope
+    {
+        $processStamp = $envelope->last(ProcessIdStamp::class);
+        if (!$processStamp instanceof ProcessIdStamp) {
+            return $stack->next()->handle($envelope, $stack);
+        }
+
+        // ambient procesu: handler może dispatchować kolejne wiadomości, które dziedziczą go
+        $this->processContext->enter($processStamp->processId);
+        try {
+            return $stack->next()->handle($envelope, $stack);
+        } finally {
+            $this->processContext->exit();
+        }
+    }
+
+    private function resolveProcessId(Envelope $envelope): ?string
+    {
+        // priorytet: jawny stamp dewelopera > ambient (obecnie obsługiwany proces) > atrybut na message
+        $explicitStamp = $envelope->last(ProcessIdStamp::class);
+        if ($explicitStamp instanceof ProcessIdStamp) {
+            return $explicitStamp->processId;
+        }
+
+        return $this->processContext->current() ?? $this->processIdResolver->resolve($envelope->getMessage());
     }
 
     private function publish(string $occurrenceId, Envelope $envelope, MessageStage $stage, ?Throwable $exception = null): void
@@ -73,7 +109,13 @@ final readonly class MonitoringMiddleware implements MiddlewareInterface
             $occurrenceId,
             $this->messageContextFactory->createFrom($envelope->getMessage()),
             $entry,
+            $this->processId($envelope),
         );
+    }
+
+    private function processId(Envelope $envelope): ?string
+    {
+        return $envelope->last(ProcessIdStamp::class)?->processId;
     }
 
     private function syncStage(Envelope $envelope): MessageStage

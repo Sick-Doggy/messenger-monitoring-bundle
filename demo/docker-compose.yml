@@ -6,7 +6,8 @@
 x-demo-env: &demo-env
     MONITORING_APP_NAME: demo-app
     MONITORING_ENVIRONMENT: docker
-    MONITORING_ENDPOINT_URL: http://mock-store:9988/api/lifecycles
+    MONITORING_API_KEY: XFn5tWKtLvgEcuzhUFHRw
+    MONITORING_ENDPOINT_URL: https://mm.tomczuk.pro/
     APP_SECRET: demo-not-so-secret
 
 services:
@@ -38,4 +39,4 @@ services:
         volumes:
             - ../:/workspace
         environment: *demo-env
-        command: php bin/console messenger:consume async
+        command: php bin/console messenger:consume async -vv

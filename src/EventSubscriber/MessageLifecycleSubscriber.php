@@ -10,6 +10,7 @@ use SickDoggy\MessengerMonitoring\Report\Model\MessageStage;
 use SickDoggy\MessengerMonitoring\Report\StatusChangePublisher;
 use SickDoggy\MessengerMonitoring\Report\Model\StatusEntry;
 use SickDoggy\MessengerMonitoring\Stamp\MonitoringStamp;
+use SickDoggy\MessengerMonitoring\Stamp\ProcessIdStamp;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Event\WorkerMessageFailedEvent;
@@ -84,6 +85,7 @@ final readonly class MessageLifecycleSubscriber implements EventSubscriberInterf
             $occurrenceId,
             $this->messageContextFactory->createFrom($envelope->getMessage()),
             $entry,
+            $envelope->last(ProcessIdStamp::class)?->processId,
         );
     }
 

@@ -3,13 +3,19 @@
 declare(strict_types=1);
 
 // Prosty "store" zastępczy — wypisuje każdy przychodzący request na konsolę serwera.
+// Kontrakt: docs/ARCHITECTURE.md (spec v3) — POST /api/monitors (upsert nagłówka)
+// oraz POST /api/monitors/{occurrenceId}/states (dopisanie stanu).
 // Uruchamianie: php -S 127.0.0.1:9988 router.php
 // Uwaga: w SAPI cli-server (php -S) stała STDERR jest niezdefiniowana — logujemy przez error_log().
 
 $method = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-if ($method === 'POST' && $path === '/api/lifecycles') {
+$isMonitor = $method === 'POST' && $path === '/api/monitors';
+$isState = $method === 'POST'
+    && preg_match('#^/api/monitors/[^/]+/states$#', $path) === 1;
+
+if ($isMonitor || $isState) {
     $raw = (string) file_get_contents('php://input');
     $payload = json_decode($raw);
 
@@ -17,7 +23,7 @@ if ($method === 'POST' && $path === '/api/lifecycles') {
         http_response_code(400);
         header('Content-Type: application/json');
         echo json_encode(['status' => 'invalid-json']);
-        error_log("POST /api/lifecycles  < BŁĘDNY JSON");
+        error_log("POST $path  < BŁĘDNY JSON");
         exit;
     }
 
