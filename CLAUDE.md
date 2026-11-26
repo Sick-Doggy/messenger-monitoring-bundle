@@ -36,8 +36,10 @@ Mock store (`demo/mock-store/router.php`) — tylko podglądanie POST; w cli-ser
 ## Architektura (strumień danych)
 
 1. **Marker** `MonitoredMessage` włącza monitoring wiadomości (bez konfiguracji).
-2. **`RegisterBusMiddlewarePass`** (CompilerPass, `TYPE_BEFORE_REMOVING` — po `MessengerPass`) wstrzykuje
-   `MonitoringMiddleware` do stacków wszystkich `messenger.bus.*`. Deweloper NIE konfiguruje middleware ręcznie
+2. **`RegisterBusMiddlewarePass`** (CompilerPass, `TYPE_BEFORE_REMOVING` — po `MessengerPass` (ten idzie w
+   `BEFORE_OPTIMIZATION`)) wstrzykuje `MonitoringMiddleware` do stacków busów rozpoznawanych po tagu
+   `messenger.bus` (id busa = klucz z `buses:` w configu — prefiks `messenger.bus.*` NIE jest gwarantowany;
+   tag + fallback po prefiksie). Deweloper NIE konfiguruje middleware ręcznie
    (opt-out: `auto_register_bus_middleware: false`). Tag `messenger.middleware` **nie istnieje jako mechanizm**
    w Symfony 6.4 — nie używać do rejestracji (stacki buduje `MessengerPass` z parametru `$busId.'.middleware'`;
    stack = `IteratorArgument` z raw `Reference`, nie `ServiceClosureArgument`).

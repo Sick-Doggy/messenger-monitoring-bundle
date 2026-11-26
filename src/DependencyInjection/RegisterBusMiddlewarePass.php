@@ -30,11 +30,15 @@ final class RegisterBusMiddlewarePass implements CompilerPassInterface
             return;
         }
 
-        foreach (array_keys($container->getDefinitions()) as $busId) {
-            if (!str_starts_with($busId, 'messenger.bus.')) {
-                continue;
-            }
+        // FrameworkExtension oznacza busów tagiem 'messenger.bus' (id = nazwa z configu,
+        // prefiks 'messenger.bus.' nie jest gwarantowany). Prefiks zostaje jako fallback
+        // dla busów budowanych ręcznie w starszych aplikacjach.
+        $busIds = array_merge(
+            array_keys($container->findTaggedServiceIds('messenger.bus')),
+            preg_grep('/^messenger\.bus\./', array_keys($container->getDefinitions())) ?: [],
+        );
 
+        foreach (array_unique($busIds) as $busId) {
             $this->prependMiddleware($busId, $container->getDefinition($busId));
         }
     }
