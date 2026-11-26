@@ -44,7 +44,11 @@ final readonly class StoreLifecycleReporter implements LifecycleReporter
             }
         } catch (Throwable $exception) {
             // raportowanie nie może złamać aplikacji, ale jego utrata musi być widoczna
-            $this->logger?->warning('messenger-monitoring: publish failed', ['error' => $exception->getMessage()]);
+            $this->logger?->warning('messenger-monitoring: publish failed', [
+                'occurrence_id' => $lifecycle->occurrenceId,
+                'class' => $lifecycle->className,
+                'error' => $exception::class.': '.$exception->getMessage(),
+            ]);
         }
     }
 
@@ -55,9 +59,17 @@ final readonly class StoreLifecycleReporter implements LifecycleReporter
         try {
             $this->client->addMonitorState($monitor->occurrenceId, $state);
         } catch (MonitorNotFoundException) {
+            $this->logger?->debug('messenger-monitoring: nagłówek nieznany (404), upsert przed dodaniem stanu', [
+                'occurrence_id' => $monitor->occurrenceId,
+            ]);
             $this->client->upsertMonitor($monitor);
             $this->client->addMonitorState($monitor->occurrenceId, $state);
         }
+
+        $this->logger?->debug('messenger-monitoring: stan dodany do store\'a', [
+            'occurrence_id' => $monitor->occurrenceId,
+            'stage' => $status->stage->value,
+        ]);
     }
 
     private function stateOf(StatusEntry $status): MonitorState

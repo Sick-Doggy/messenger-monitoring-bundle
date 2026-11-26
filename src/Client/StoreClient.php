@@ -11,6 +11,7 @@ use SickDoggy\MessengerMonitoring\Client\Model\MonitorState;
 use SickDoggy\MessengerMonitoring\Client\Model\StateResult;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Klient kontraktu HTTP store'a (spec v3): upsert nagłówka wystąpienia
@@ -30,6 +31,7 @@ final readonly class StoreClient
         string $baseUrl,
         private string $apiKey,
         private float $timeout = 2.0,
+        private ?LoggerInterface $logger = null,
     ) {
         $this->baseUrl = rtrim($baseUrl, '/');
     }
@@ -71,6 +73,8 @@ final readonly class StoreClient
      */
     private function post(string $path, array $payload): array
     {
+        $startedAt = microtime(true);
+
         try {
             $response = $this->client->request('POST', $this->baseUrl.$path, [
                 'headers' => [
@@ -83,8 +87,20 @@ final readonly class StoreClient
             $status = $response->getStatusCode();
             $content = $response->getContent(false);
         } catch (TransportExceptionInterface $exception) {
+            $this->logger?->error('messenger-monitoring: transport error', [
+                'path' => $path,
+                'duration_ms' => $this->durationMs($startedAt),
+                'error' => $exception->getMessage(),
+            ]);
+
             throw new ApiClientException(sprintf('POST %s błąd transportu: %s', $path, $exception->getMessage()), 0, $exception);
         }
+
+        $this->logger?->debug('messenger-monitoring: POST {path} → HTTP {status}', [
+            'path' => $path,
+            'status' => $status,
+            'duration_ms' => $this->durationMs($startedAt),
+        ]);
 
         $decoded = $content === '' ? null : json_decode($content, true);
 
@@ -101,6 +117,11 @@ final readonly class StoreClient
         }
 
         throw new ApiClientException(sprintf('POST %s: HTTP %d %s', $path, $status, $this->bodySnippet($body)));
+    }
+
+    private function durationMs(float $startedAt): int
+    {
+        return (int) round((microtime(true) - $startedAt) * 1000);
     }
 
     /**

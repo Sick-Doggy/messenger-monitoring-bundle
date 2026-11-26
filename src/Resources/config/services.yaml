@@ -13,11 +13,16 @@ services:
             $baseUrl: '%messenger_monitoring.endpoint%'
             $apiKey: '%messenger_monitoring.api_key%'
             $timeout: '%messenger_monitoring.timeout%'
+            $logger: '@logger'
+        tags:
+            - { name: monolog.logger, channel: messenger_monitoring }
 
     SickDoggy\MessengerMonitoring\Report\StoreLifecycleReporter:
         autowire: true
-        bind:
-            Psr\Log\LoggerInterface: '@logger'
+        arguments:
+            $logger: '@logger'
+        tags:
+            - { name: monolog.logger, channel: messenger_monitoring }
 
     SickDoggy\MessengerMonitoring\Report\LifecycleReporter: '@SickDoggy\MessengerMonitoring\Report\StoreLifecycleReporter'
 
@@ -26,6 +31,9 @@ services:
         arguments:
             $application: '%messenger_monitoring.application%'
             $environment: '%messenger_monitoring.environment%'
+            $logger: '@logger'
+        tags:
+            - { name: monolog.logger, channel: messenger_monitoring }
 
     SickDoggy\MessengerMonitoring\Attribute\MonitoringIdResolver:
         autowire: true
