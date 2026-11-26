@@ -45,7 +45,7 @@ Mock store (`demo/mock-store/router.php`) — tylko podglądanie POST; w cli-ser
    guard: stamp istnieje → strona konsumpcji) i raportuje stany `sent` / `handled` (sync, brak `SentStamp`) / `send-failed`.
 4. **`MessageLifecycleSubscriber`** (konsumpcja): eventy `WorkerMessage{Received,Handled,Failed}Event`;
    `willRetry()` rozdziela `failed-retry` / `failed-final`.
-5. **`StatusChangePublisher`** → **`HttpReporter`**: POST per zmiana statusu (payload = nagłówek + `statuses[]` z JEDNYM wpisem); store scala po `occurrenceId`. Reporter jest failure-safe (błąd POST → warning, nigdy wyjątek).
+5. **`StatusChangePublisher`** → **`StoreLifecycleReporter`** → **`Client\StoreClient`** (`src/Client/`): przy każdej zmianie statusu POST stanu, upsert nagłówka automatycznie na HTTP 404 (przepływ w kontrakcie, ARCHITECTURE.md). Reporter jest failure-safe (błąd POST → warning, nigdy wyjątek). `api_key` wymagany.
 
 ## Konwenty (trzymać się ich przy nowych funkcjach)
 

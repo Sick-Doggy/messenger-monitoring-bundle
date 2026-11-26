@@ -31,7 +31,7 @@ final class Configuration implements ConfigurationInterface
         $children->scalarNode('endpoint')
             ->isRequired()
             ->cannotBeEmpty()
-            ->info('Adres POST migawek cyklu życia w store (API Platform)')
+            ->info('Base URL store\'a (np. https://store.example.com) — klient dokleja /api/monitors')
             ->end();
 
         $children->scalarNode('environment')
@@ -40,7 +40,9 @@ final class Configuration implements ConfigurationInterface
             ->end();
 
         $children->scalarNode('api_key')
-            ->defaultNull()
+            ->isRequired()
+            ->cannotBeEmpty()
+            ->info('Klucz X-Api-Key — wszystkie operacje API store\'a go wymagają')
             ->end();
 
         $children->floatNode('timeout')

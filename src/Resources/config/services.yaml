@@ -7,16 +7,19 @@ services:
         tags:
             - { name: kernel.event_subscriber }
 
-    SickDoggy\MessengerMonitoring\Report\HttpReporter:
+    SickDoggy\MessengerMonitoring\Client\StoreClient:
         autowire: true
         arguments:
-            $endpoint: '%messenger_monitoring.endpoint%'
+            $baseUrl: '%messenger_monitoring.endpoint%'
             $apiKey: '%messenger_monitoring.api_key%'
             $timeout: '%messenger_monitoring.timeout%'
+
+    SickDoggy\MessengerMonitoring\Report\StoreLifecycleReporter:
+        autowire: true
         bind:
             Psr\Log\LoggerInterface: '@logger'
 
-    SickDoggy\MessengerMonitoring\Report\LifecycleReporter: '@SickDoggy\MessengerMonitoring\Report\HttpReporter'
+    SickDoggy\MessengerMonitoring\Report\LifecycleReporter: '@SickDoggy\MessengerMonitoring\Report\StoreLifecycleReporter'
 
     SickDoggy\MessengerMonitoring\Report\StatusChangePublisher:
         autowire: true
